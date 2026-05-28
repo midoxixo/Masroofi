@@ -1,0 +1,6 @@
+{
+  "name": "Masroofi",
+  "description": "A modern monthly expense, income, and budget tracker with support for Arabic and English languages, visual charts, and historical comparisons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

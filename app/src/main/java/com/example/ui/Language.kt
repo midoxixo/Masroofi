@@ -1,0 +1,185 @@
+package com.example.ui
+
+enum class AppLanguage { AR, EN }
+
+object LanguageStrings {
+    private val arMap = mapOf(
+        "app_name" to "مصروفي",
+        "switch_lang" to "English",
+        "active_month" to "الشهر النشط",
+        "monthly_summary" to "ملخص الشهر",
+        "base_income" to "الدخل الأساسي",
+        "extra_income" to "إيرادات إضافية",
+        "total_revenue" to "إجمالي الدخل",
+        "total_expenses" to "إجمالي المصروفات",
+        "balance" to "الرصيد المتبقي",
+        "add_expense" to "إضافة مصروف",
+        "add_extra_income" to "إضافة إيراد",
+        "new_month" to "شهر جديد",
+        "new_month_title" to "بدء موازنة شهر جديد",
+        "month_format_tip" to "الصيغة: YYYY-MM (مثال: 2026-05)",
+        "base_income_label" to "الدخل الأساسي لهذا الشهر",
+        "save" to "حفظ",
+        "cancel" to "إلغاء",
+        "amount" to "المبلغ",
+        "category" to "الفئة",
+        "note" to "ملاحظة / المصدر",
+        "recent_transactions" to "المعاملات الأخيرة",
+        "compare_months" to "مقارنة الشهور الأقدم",
+        "income_vs_expense" to "الدخل مقابل المصاريف",
+        "custom_filter" to "بحث بفترة مخصصة",
+        "from_date" to "من تاريخ",
+        "to_date" to "إلى تاريخ",
+        "filter" to "تصفية",
+        "no_data" to "لا توجد بيانات متاحة لهذا الشهر",
+        "no_transactions" to "لا توجد معاملات مضافة بعد",
+        "delete_confirm" to "هل أنت متأكد من رغبتك في حذف هذه المعاملة؟",
+        "tab_dashboard" to "الرئيسية",
+        "tab_compare" to "المقارنة والمقاييس",
+        "tab_filter" to "بحث بالتاريخ",
+        "tab_settings" to "الأدوات والذكاء",
+        "add" to "إضافة",
+        "delete" to "حذف",
+        "enter_amount" to "يرجى إدخال مبلغ صالح",
+        "enter_month" to "يرجى كتابة اسم الشهر بالصيغة الصحيحة YYYY-MM",
+        "confirm_delete_month" to "سيتم حذف هذا الشهر وكافة معاملاته بشكل نهائي. هل تريد الاستمرار؟",
+        "delete_month" to "حذف الشهر الحالي",
+        "empty_chart" to "رسم بياني فارغ",
+        "categories" to "الفئات",
+        "welcome_back" to "مرحباً بك،",
+        "default_user" to "أحمد محمد",
+        
+        // Expense categories
+        "cat_food" to "طعام وغذاء",
+        "cat_transport" to "مواصلات سيارات",
+        "cat_rent" to "إيجار وسكن",
+        "cat_utilities" to "فواتير وخدمات",
+        "cat_shopping" to "تسوق وملابس",
+        "cat_entertainment" to "ترفيه و خروج",
+        "cat_medical" to "علاج وصحة",
+        "cat_other" to "مصاريف أخرى",
+        
+        // Income categories
+        "cat_bonus" to "مكافأة إضافية",
+        "cat_investment" to "أرباح استثمار",
+        "cat_gift" to "هدية مالية",
+        "cat_side_project" to "عمل حر جانبي",
+        "cat_salary" to "راتب",
+        "cat_inc_other" to "إيراد آخر",
+        "cat_loan" to "السلفة المالية",
+        
+        // Theme modes
+        "theme_mode_title" to "وضع مظهر التطبيق",
+        "theme_mode_system" to "تلقائي",
+        "theme_mode_light" to "وضع نهاري",
+        "theme_mode_dark" to "وضع ليلي",
+
+        // Loans translations
+        "tab_loans" to "السلف المالية",
+        "no_loans" to "لا توجد سلف مالية مضافة بعد",
+        "add_loan" to "إضافة سلفة مالية جديدة",
+        "loan_name_label" to "اسم/وصف السلفة المالية",
+        "loan_amount_label" to "مبلغ السلفة المالية",
+        "loan_name_placeholder" to "مثال: سلفة مالية من أحمد",
+        "prev_month_loan_deduction" to "خصم السلف المالية من الشهر السابق",
+        "update_app_version" to "تحديث نسخة التطبيق",
+        "checking_for_updates" to "جاري التحقق من التحديثات...",
+        "app_up_to_date" to "التطبيق محدث بالفعل.",
+        "most_expensive" to "الأكثر انفاقاً",
+        "least_expensive" to "الأقل انفاقاً"
+    )
+
+    private val enMap = mapOf(
+        "app_name" to "Masroofy",
+        "switch_lang" to "العربية",
+        "active_month" to "Active Month",
+        "monthly_summary" to "Monthly Summary",
+        "base_income" to "Base Income",
+        "extra_income" to "Extra Income",
+        "total_revenue" to "Total Revenue",
+        "total_expenses" to "Total Expenses",
+        "balance" to "Remaining Balance",
+        "add_expense" to "Add Expense",
+        "add_extra_income" to "Add Extra Income",
+        "new_month" to "New Month",
+        "new_month_title" to "Start New Month Budget",
+        "month_format_tip" to "Format: YYYY-MM (e.g. 2026-05)",
+        "base_income_label" to "Base Income for this month",
+        "save" to "Save",
+        "cancel" to "Cancel",
+        "amount" to "Amount",
+        "category" to "Category",
+        "note" to "Note / Source",
+        "recent_transactions" to "Recent Transactions",
+        "compare_months" to "Filter & Compare Months",
+        "income_vs_expense" to "Income vs Expenses",
+        "custom_filter" to "Custom Date Range Filter",
+        "from_date" to "From Date",
+        "to_date" to "To Date",
+        "filter" to "Apply Filter",
+        "no_data" to "No data available for this month",
+        "no_transactions" to "No transactions added yet",
+        "delete_confirm" to "Are you sure you want to delete this transaction?",
+        "tab_dashboard" to "Dashboard",
+        "tab_compare" to "Compare & Analytics",
+        "tab_filter" to "Date Search",
+        "tab_settings" to "AI & Tools",
+        "add" to "Add",
+        "delete" to "Delete",
+        "enter_amount" to "Please enter a valid amount",
+        "enter_month" to "Please enter month in YYYY-MM format",
+        "confirm_delete_month" to "This will permanently delete this month and all its transactions. Continue?",
+        "delete_month" to "Delete Current Month",
+        "empty_chart" to "Empty Chart",
+        "categories" to "Categories",
+        "welcome_back" to "Welcome,",
+        "default_user" to "Ahmed Mohamed",
+        
+        // Expense categories
+        "cat_food" to "Food & Groceries",
+        "cat_transport" to "Transportation",
+        "cat_rent" to "Rent & Accommodation",
+        "cat_utilities" to "Bills & Utilities",
+        "cat_shopping" to "Shopping & Clothes",
+        "cat_entertainment" to "Entertainment & Travel",
+        "cat_medical" to "Health & Medical",
+        "cat_other" to "Other Expenses",
+        
+        // Income categories
+        "cat_bonus" to "Bonus",
+        "cat_investment" to "Investments",
+        "cat_gift" to "Gifts",
+        "cat_side_project" to "Side Freelance",
+        "cat_salary" to "Salary",
+        "cat_inc_other" to "Other Income",
+        "cat_loan" to "Financial Loan",
+        
+        // Theme modes
+        "theme_mode_title" to "App Theme Mode",
+        "theme_mode_system" to "System",
+        "theme_mode_light" to "Light",
+        "theme_mode_dark" to "Dark",
+
+        // Loans translations
+        "tab_loans" to "Loans & Advances",
+        "no_loans" to "No loans added yet",
+        "add_loan" to "Add New Loan",
+        "loan_name_label" to "Loan Name/Description",
+        "loan_amount_label" to "Loan Amount",
+        "loan_name_placeholder" to "e.g. Loan from Ahmed",
+        "prev_month_loan_deduction" to "Prev Month Loan Deduction",
+        "update_app_version" to "Update App Version",
+        "checking_for_updates" to "Checking for updates...",
+        "app_up_to_date" to "App is up to date.",
+        "most_expensive" to "Most Expensive",
+        "least_expensive" to "Least Expensive"
+    )
+
+    fun get(key: String, lang: AppLanguage): String {
+        return if (lang == AppLanguage.AR) {
+            arMap[key] ?: enMap[key] ?: key
+        } else {
+            enMap[key] ?: arMap[key] ?: key
+        }
+    }
+}
