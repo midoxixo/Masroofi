@@ -24,6 +24,12 @@ class FinanceRepository(private val financeDao: FinanceDao) {
         financeDao.deleteTransactionsByMonth(monthId)
     }
 
+    suspend fun deleteAllData() {
+        financeDao.deleteAllMonthBudgets()
+        financeDao.deleteAllTransactions()
+        financeDao.deleteAllLoans()
+    }
+
     fun getTransactionsForMonth(monthId: String): Flow<List<Transaction>> {
         return financeDao.getTransactionsForMonth(monthId)
     }

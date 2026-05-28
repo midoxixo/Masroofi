@@ -444,6 +444,14 @@ class FinanceViewModel(
         }
     }
 
+    fun resetAllData() {
+        viewModelScope.launch {
+            repository.deleteAllData()
+            // Ensure there remains at least one active month for the UI to not break
+            repository.insertMonthBudget(MonthBudget(activeMonthId.value, 0.0, "New Active Month"))
+        }
+    }
+
     // --- Loan methods ---
     fun addLoan(amount: Double, title: String) {
         val monthId = activeMonthId.value

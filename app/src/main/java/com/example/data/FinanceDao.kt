@@ -21,6 +21,9 @@ interface FinanceDao {
     @Query("DELETE FROM month_budgets WHERE monthId = :monthId")
     suspend fun deleteMonthBudgetById(monthId: String)
 
+    @Query("DELETE FROM month_budgets")
+    suspend fun deleteAllMonthBudgets()
+
     // --- Transaction Queries ---
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
     fun getAllTransactions(): Flow<List<Transaction>>
@@ -39,6 +42,9 @@ interface FinanceDao {
 
     @Query("DELETE FROM transactions WHERE monthId = :monthId")
     suspend fun deleteTransactionsByMonth(monthId: String)
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAllTransactions()
 
     // --- Custom Category Queries ---
     @Query("SELECT * FROM custom_categories ORDER BY isSystem DESC, name ASC")
@@ -62,4 +68,7 @@ interface FinanceDao {
 
     @Delete
     suspend fun deleteLoan(loan: Loan)
+
+    @Query("DELETE FROM loans")
+    suspend fun deleteAllLoans()
 }

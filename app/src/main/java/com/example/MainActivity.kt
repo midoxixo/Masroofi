@@ -284,7 +284,8 @@ fun MainTopAppBar(
                 // Sleek User Greeting with Avatar
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
                 ) {
                     val defaultUserStr = userName.ifEmpty { LanguageStrings.get("default_user", lang) }
                     val avatarChar = defaultUserStr.firstOrNull()?.toString() ?: "U"
@@ -318,7 +319,9 @@ fun MainTopAppBar(
                             text = defaultUserStr,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -543,7 +546,7 @@ fun MainBottomNavigationBar(
             label = { Text(LanguageStrings.get("tab_loans", lang), fontSize = 11.sp) },
             icon = {
                 Icon(
-                    imageVector = if (selectedTab == 3) Icons.Default.Payments else Icons.Default.Payments,
+                    imageVector = Icons.Default.Payments,
                     contentDescription = null
                 )
             },
@@ -2959,6 +2962,7 @@ fun SettingsToolsTab(
     val chatLoading by viewModel.isChatLoading.collectAsStateWithLifecycle()
     val categoriesList by viewModel.customCategories.collectAsStateWithLifecycle()
     var showResetMonthDialog by remember { mutableStateOf(false) }
+    var showResetAllDialog by remember { mutableStateOf(false) }
 
     if (showResetMonthDialog) {
         AlertDialog(
@@ -2976,6 +2980,24 @@ fun SettingsToolsTab(
             }
         )
     }
+
+    if (showResetAllDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetAllDialog = false },
+            title = { Text(LanguageStrings.get("reset_all_data", lang)) },
+            text = { Text(LanguageStrings.get("confirm_reset_all_data", lang)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.resetAllData()
+                    showResetAllDialog = false
+                }) { Text(LanguageStrings.get("delete", lang)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetAllDialog = false }) { Text(LanguageStrings.get("cancel", lang)) }
+            }
+        )
+    }
+
 
     val isAr = lang == AppLanguage.AR
 
@@ -3245,6 +3267,15 @@ fun SettingsToolsTab(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = LanguageStrings.get("reset_data_title", lang),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
                     Button(
                         onClick = { showResetMonthDialog = true },
                         modifier = Modifier
@@ -3252,10 +3283,28 @@ fun SettingsToolsTab(
                             .height(48.dp)
                             .testTag("btn_reset_month"),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error.copy(alpha=0.8f))
                     ) {
                         Text(
                             text = LanguageStrings.get("reset_month_data", lang),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = { showResetAllDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .testTag("btn_reset_all"),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(
+                            text = LanguageStrings.get("reset_all_data", lang),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -3264,6 +3313,7 @@ fun SettingsToolsTab(
                     // Theme Mode toggling row (Light Mode (Day) / Dark Mode (Night))
                     Spacer(modifier = Modifier.height(14.dp))
                     Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), thickness = 1.dp)
+
                     Spacer(modifier = Modifier.height(14.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -3520,7 +3570,7 @@ fun SettingsToolsTab(
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             // Hour input
@@ -3535,15 +3585,16 @@ fun SettingsToolsTab(
                                         }
                                     }
                                 },
-                                label = { Text(if (isAr) "ساعة" else "Hour", fontSize = 11.sp) },
-                                placeholder = { Text("12", fontSize = 11.sp) },
+                                label = { Text(if (isAr) "ساعة" else "Hr", fontSize = 10.sp, maxLines = 1) },
+                                placeholder = { Text("12", fontSize = 10.sp) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.width(68.dp).testTag("reminder_manual_hour")
+                                modifier = Modifier.weight(1f).testTag("reminder_manual_hour"),
+                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp)
                             )
 
-                            Text(":", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)
+                            Text(":", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
 
                             // Minute input
                             OutlinedTextField(
@@ -3557,12 +3608,13 @@ fun SettingsToolsTab(
                                         }
                                     }
                                 },
-                                label = { Text(if (isAr) "دقيقة" else "Min", fontSize = 11.sp) },
-                                placeholder = { Text("00", fontSize = 11.sp) },
+                                label = { Text(if (isAr) "دقيقة" else "Min", fontSize = 10.sp, maxLines = 1) },
+                                placeholder = { Text("00", fontSize = 10.sp) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.width(68.dp).testTag("reminder_manual_minute")
+                                modifier = Modifier.weight(1f).testTag("reminder_manual_minute"),
+                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp)
                             )
 
                             // Segmented layout for AM/PM
@@ -3572,7 +3624,7 @@ fun SettingsToolsTab(
                                 modifier = Modifier.height(52.dp)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(4.dp),
+                                    modifier = Modifier.padding(2.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Box(
@@ -3580,11 +3632,11 @@ fun SettingsToolsTab(
                                             .clip(RoundedCornerShape(6.dp))
                                             .background(if (manualAmPm == "AM") MaterialTheme.colorScheme.primary else Color.Transparent)
                                             .clickable { manualAmPm = "AM" }
-                                            .padding(horizontal = 10.dp, vertical = 8.dp)
+                                            .padding(horizontal = 6.dp, vertical = 6.dp)
                                             .testTag("reminder_manual_am")
                                     ) {
                                         Text(
-                                            text = if (isAr) "صباحاً" else "AM",
+                                            text = if (isAr) "ص" else "AM",
                                             color = if (manualAmPm == "AM") Color.White else MaterialTheme.colorScheme.onSurface,
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold
@@ -3596,11 +3648,11 @@ fun SettingsToolsTab(
                                             .clip(RoundedCornerShape(6.dp))
                                             .background(if (manualAmPm == "PM") MaterialTheme.colorScheme.primary else Color.Transparent)
                                             .clickable { manualAmPm = "PM" }
-                                            .padding(horizontal = 10.dp, vertical = 8.dp)
+                                            .padding(horizontal = 6.dp, vertical = 6.dp)
                                             .testTag("reminder_manual_pm")
                                     ) {
                                         Text(
-                                            text = if (isAr) "مساءً" else "PM",
+                                            text = if (isAr) "م" else "PM",
                                             color = if (manualAmPm == "PM") Color.White else MaterialTheme.colorScheme.onSurface,
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold
@@ -3608,8 +3660,6 @@ fun SettingsToolsTab(
                                     }
                                 }
                             }
-
-                            Spacer(modifier = Modifier.width(4.dp))
 
                             // Save Button
                             Button(
@@ -3625,10 +3675,10 @@ fun SettingsToolsTab(
                                     }
                                 },
                                 shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.height(48.dp).weight(1f).testTag("reminder_manual_save_button"),
-                                contentPadding = PaddingValues(horizontal = 4.dp)
+                                modifier = Modifier.height(52.dp).weight(1.5f).testTag("reminder_manual_save_button"),
+                                contentPadding = PaddingValues(horizontal = 2.dp)
                             ) {
-                                Text(if (isAr) "حفظ التوقيت" else "Set Alarm", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Text(if (isAr) "حفظ" else "Set", fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                             }
                         }
                     }
@@ -4519,10 +4569,10 @@ fun Text(
         TextUnit.Unspecified
     }
     
-    val finalWeight = if (globalWeight == "BOLD") {
-        FontWeight.Bold
-    } else {
-        fontWeight ?: style.fontWeight
+    val finalWeight = when (globalWeight) {
+        "BOLD" -> FontWeight.Bold
+        "NORMAL" -> FontWeight.Normal
+        else -> fontWeight ?: style.fontWeight
     }
     
     androidx.compose.material3.Text(
@@ -4586,10 +4636,10 @@ fun Text(
         TextUnit.Unspecified
     }
     
-    val finalWeight = if (globalWeight == "BOLD") {
-        FontWeight.Bold
-    } else {
-        fontWeight ?: style.fontWeight
+    val finalWeight = when (globalWeight) {
+        "BOLD" -> FontWeight.Bold
+        "NORMAL" -> FontWeight.Normal
+        else -> fontWeight ?: style.fontWeight
     }
     
     androidx.compose.material3.Text(

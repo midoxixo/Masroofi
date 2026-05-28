@@ -88,6 +88,10 @@ object LanguageStrings {
         "most_expensive" to "الأكثر انفاقاً",
         "least_expensive" to "الأقل انفاقاً",
         "reset_month_data" to "تصفير بيانات الشهر",
+        "reset_data_title" to "تصفير البيانات",
+        "reset_all_data" to "تصفير للمقارنه و المقاييس",
+        "confirm_reset_all_data" to "هل أنت متأكد من تصفير جميع المدخلات والمقاييس بشكل كامل؟ لا يمكن التراجع.",
+
         "confirm_reset_month" to "هل أنت متأكد من رغبتك في تصفير جميع مصروفات وإيرادات هذا الشهر؟",
         "font_size" to "حجم الخط",
         "font_weight" to "سماكة الخط",
@@ -180,6 +184,10 @@ object LanguageStrings {
         "most_expensive" to "Most Expensive",
         "least_expensive" to "Least Expensive",
         "reset_month_data" to "Reset Month Data",
+        "reset_data_title" to "Data Reset",
+        "reset_all_data" to "Reset Comparisons and Metrics",
+        "confirm_reset_all_data" to "Are you sure you want to reset all data? This cannot be undone.",
+
         "confirm_reset_month" to "Are you sure you want to reset all expenses and revenues for this month?",
         "font_size" to "Font Size",
         "font_weight" to "Font Weight",
