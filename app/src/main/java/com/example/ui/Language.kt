@@ -86,7 +86,13 @@ object LanguageStrings {
         "checking_for_updates" to "جاري التحقق من التحديثات...",
         "app_up_to_date" to "التطبيق محدث بالفعل.",
         "most_expensive" to "الأكثر انفاقاً",
-        "least_expensive" to "الأقل انفاقاً"
+        "least_expensive" to "الأقل انفاقاً",
+        "reset_month_data" to "تصفير بيانات الشهر",
+        "confirm_reset_month" to "هل أنت متأكد من رغبتك في تصفير جميع مصروفات وإيرادات هذا الشهر؟",
+        "font_size" to "حجم الخط",
+        "font_weight" to "سماكة الخط",
+        "bold" to "عريض",
+        "normal" to "عادي"
     )
 
     private val enMap = mapOf(
@@ -172,7 +178,13 @@ object LanguageStrings {
         "checking_for_updates" to "Checking for updates...",
         "app_up_to_date" to "App is up to date.",
         "most_expensive" to "Most Expensive",
-        "least_expensive" to "Least Expensive"
+        "least_expensive" to "Least Expensive",
+        "reset_month_data" to "Reset Month Data",
+        "confirm_reset_month" to "Are you sure you want to reset all expenses and revenues for this month?",
+        "font_size" to "Font Size",
+        "font_weight" to "Font Weight",
+        "bold" to "Bold",
+        "normal" to "Normal"
     )
 
     fun get(key: String, lang: AppLanguage): String {

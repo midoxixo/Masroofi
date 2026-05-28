@@ -19,6 +19,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -72,14 +79,21 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeIndex by viewModel.selectedThemeIndex.collectAsStateWithLifecycle()
             val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+            val fontSizeLevel by viewModel.fontSizeLevel.collectAsStateWithLifecycle()
+            val fontWeight by viewModel.fontWeight.collectAsStateWithLifecycle()
             val systemDark = isSystemInDarkTheme()
             val darkTheme = when (themeMode) {
                 "LIGHT" -> false
                 "DARK" -> true
                 else -> systemDark
             }
-            MyApplicationTheme(themeIndex = themeIndex, darkTheme = darkTheme) {
-                MainAppScreen(viewModel = viewModel)
+            CompositionLocalProvider(
+                LocalFontSizeLevel provides fontSizeLevel,
+                LocalFontWeightGlobal provides fontWeight
+            ) {
+                MyApplicationTheme(themeIndex = themeIndex, darkTheme = darkTheme) {
+                    MainAppScreen(viewModel = viewModel)
+                }
             }
         }
     }
@@ -1527,14 +1541,15 @@ fun CompareTab(
     allTransactions: List<Transaction>,
     onDeleteMonth: (String) -> Unit
 ) {
+    val expenses = remember(allTransactions) { allTransactions.filter { it.type == "EXPENSE" } }
+    val mostExpensive = remember(expenses) { expenses.maxByOrNull { it.amount } }
+    val leastExpensive = remember(expenses) { expenses.minByOrNull { it.amount } }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        val expenses = allTransactions.filter { it.type == "EXPENSE" }
-        val mostExpensive = expenses.maxByOrNull { it.amount }
-        val leastExpensive = expenses.minByOrNull { it.amount }
 
         if (expenses.isNotEmpty()) {
             item {
@@ -1549,25 +1564,27 @@ fun CompareTab(
                             modifier = Modifier.weight(1f)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = LanguageStrings.get("most_expensive", lang),
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                                Text(
-                                    text = mostExpensive.note,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onErrorContainer,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = viewModel.formatMoney(mostExpensive.amount),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = MaterialTheme.colorScheme.error
-                                )
+                        Text(
+                            text = LanguageStrings.get("most_expensive", lang),
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = mostExpensive.note,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = viewModel.formatMoney(mostExpensive.amount),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.error
+                        )
                             }
                         }
                     }
@@ -1578,25 +1595,27 @@ fun CompareTab(
                             modifier = Modifier.weight(1f)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = LanguageStrings.get("least_expensive", lang),
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                                Text(
-                                    text = leastExpensive.note,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = viewModel.formatMoney(leastExpensive.amount),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
+                        Text(
+                            text = LanguageStrings.get("least_expensive", lang),
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = leastExpensive.note,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = viewModel.formatMoney(leastExpensive.amount),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
                             }
                         }
                     }
@@ -2127,7 +2146,7 @@ fun DonutChart(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     
-                    val translateKey = "cat_${item.category.lowercase()}"
+                    val translateKey = "cat_${item.category.lowercase().replace(" ", "_")}"
                     Text(
                         text = LanguageStrings.get(translateKey, lang),
                         fontSize = 11.sp,
@@ -2933,9 +2952,30 @@ fun SettingsToolsTab(
     val reminderTime by viewModel.reminderTime.collectAsStateWithLifecycle()
     val reminderFreq by viewModel.reminderFrequency.collectAsStateWithLifecycle()
 
+    val fontSizeLevel by viewModel.fontSizeLevel.collectAsStateWithLifecycle()
+    val fontWeight by viewModel.fontWeight.collectAsStateWithLifecycle()
+
     val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
     val chatLoading by viewModel.isChatLoading.collectAsStateWithLifecycle()
     val categoriesList by viewModel.customCategories.collectAsStateWithLifecycle()
+    var showResetMonthDialog by remember { mutableStateOf(false) }
+
+    if (showResetMonthDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetMonthDialog = false },
+            title = { Text(LanguageStrings.get("reset_month_data", lang)) },
+            text = { Text(LanguageStrings.get("confirm_reset_month", lang)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.resetMonthData(viewModel.activeMonthId.value)
+                    showResetMonthDialog = false
+                }) { Text(LanguageStrings.get("delete", lang)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetMonthDialog = false }) { Text(LanguageStrings.get("cancel", lang)) }
+            }
+        )
+    }
 
     val isAr = lang == AppLanguage.AR
 
@@ -3033,70 +3073,79 @@ fun SettingsToolsTab(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // --- 0. ACCOUNT PROFILE SYSTEM ---
+        // --- 0. FONT SETTINGS SECTION ---
         item {
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    val displayUserStr = userName.ifEmpty { LanguageStrings.get("default_user", lang) }
-                    val avatarChar = displayUserStr.firstOrNull()?.toString() ?: "U"
-
-                    Box(
-                        modifier = Modifier
-                            .size(52.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary),
-                        contentAlignment = Alignment.Center
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = if (isAr) "⚙️ إعدادات الخط" else "⚙️ Font Settings",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                    
+                    Text(
+                        text = LanguageStrings.get("font_size", lang),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Text(
-                            text = avatarChar,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = displayUserStr,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        if (userEmail.isNotEmpty()) {
-                            Text(
-                                text = "🛡️ Google: $userEmail",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        } else {
-                            Text(
-                                text = if (isAr) "👤 مستخدم محلي (لم يسجل بجوجل)" else "👤 Local Session (No Google Email)",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
+                        (0..4).forEach { level ->
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(if (fontSizeLevel == level) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
+                                    .clickable { viewModel.saveFontSizeLevel(level) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = (level + 1).toString(),
+                                    color = if (fontSizeLevel == level) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
-
-                    IconButton(
-                        onClick = { viewModel.logout() },
-                        modifier = Modifier
-                            .background(Color.Red.copy(alpha = 0.1f), shape = CircleShape)
-                            .size(36.dp)
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Divider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = LanguageStrings.get("font_weight", lang),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Logout,
-                            contentDescription = "Logout",
-                            tint = Color.Red,
-                            modifier = Modifier.size(16.dp)
+                        Text(
+                            text = LanguageStrings.get("normal", lang),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                        )
+                        Switch(
+                            checked = fontWeight == "BOLD",
+                            onCheckedChange = { viewModel.saveFontWeight(if (it) "BOLD" else "NORMAL") }
+                        )
+                        Text(
+                            text = LanguageStrings.get("bold", lang),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                         )
                     }
                 }
@@ -3190,6 +3239,23 @@ fun SettingsToolsTab(
                     ) {
                         Text(
                             text = if (isCheckingUpdate) LanguageStrings.get("checking_for_updates", lang) else LanguageStrings.get("update_app_version", lang),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { showResetMonthDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .testTag("btn_reset_month"),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(
+                            text = LanguageStrings.get("reset_month_data", lang),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -4405,4 +4471,144 @@ fun LoansTab(
             }
         }
     }
+}
+
+// ============================================================================
+// DYNAMIC TYPOGRAPHY INFRASTRUCTURE (FONT SIZE SCALING & WEIGHT CONFIGURATION)
+// ============================================================================
+val LocalFontSizeLevel = staticCompositionLocalOf { 2 }
+val LocalFontWeightGlobal = staticCompositionLocalOf { "NORMAL" }
+
+@Composable
+fun Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    style: TextStyle = LocalTextStyle.current
+) {
+    val fontSizeLevel = LocalFontSizeLevel.current
+    val globalWeight = LocalFontWeightGlobal.current
+    
+    val scaleFactor = when (fontSizeLevel) {
+        0 -> 0.8f
+        1 -> 0.9f
+        2 -> 1.0f
+        3 -> 1.15f
+        4 -> 1.3f
+        else -> 1.0f
+    }
+    
+    val finalFontSize = if (fontSize != TextUnit.Unspecified) {
+        (fontSize.value * scaleFactor).sp
+    } else if (style.fontSize != TextUnit.Unspecified) {
+        (style.fontSize.value * scaleFactor).sp
+    } else {
+        TextUnit.Unspecified
+    }
+    
+    val finalWeight = if (globalWeight == "BOLD") {
+        FontWeight.Bold
+    } else {
+        fontWeight ?: style.fontWeight
+    }
+    
+    androidx.compose.material3.Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        fontSize = finalFontSize,
+        fontStyle = fontStyle,
+        fontWeight = finalWeight,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
+        lineHeight = lineHeight,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        minLines = minLines,
+        onTextLayout = onTextLayout,
+        style = style
+    )
+}
+
+@Composable
+fun Text(
+    text: AnnotatedString,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    style: TextStyle = LocalTextStyle.current
+) {
+    val fontSizeLevel = LocalFontSizeLevel.current
+    val globalWeight = LocalFontWeightGlobal.current
+    
+    val scaleFactor = when (fontSizeLevel) {
+        0 -> 0.8f
+        1 -> 0.9f
+        2 -> 1.0f
+        3 -> 1.15f
+        4 -> 1.3f
+        else -> 1.0f
+    }
+    
+    val finalFontSize = if (fontSize != TextUnit.Unspecified) {
+        (fontSize.value * scaleFactor).sp
+    } else if (style.fontSize != TextUnit.Unspecified) {
+        (style.fontSize.value * scaleFactor).sp
+    } else {
+        TextUnit.Unspecified
+    }
+    
+    val finalWeight = if (globalWeight == "BOLD") {
+        FontWeight.Bold
+    } else {
+        fontWeight ?: style.fontWeight
+    }
+    
+    androidx.compose.material3.Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        fontSize = finalFontSize,
+        fontStyle = fontStyle,
+        fontWeight = finalWeight,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
+        lineHeight = lineHeight,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        minLines = minLines,
+        onTextLayout = onTextLayout,
+        style = style
+    )
 }

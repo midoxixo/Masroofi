@@ -74,6 +74,13 @@ class FinanceViewModel(
     private val _selectedThemeIndex = MutableStateFlow(prefs.getInt("theme_index", 0))
     val selectedThemeIndex = _selectedThemeIndex.asStateFlow()
 
+    // --- Font customization: 5 levels (0-4), weight (NORMAL/BOLD) ---
+    private val _fontSizeLevel = MutableStateFlow(prefs.getInt("font_size_level", 2))
+    val fontSizeLevel = _fontSizeLevel.asStateFlow()
+
+    private val _fontWeight = MutableStateFlow(prefs.getString("font_weight", "NORMAL") ?: "NORMAL")
+    val fontWeight = _fontWeight.asStateFlow()
+
     // Mode of theme: SYSTEM, LIGHT, DARK
     private val _themeMode = MutableStateFlow(prefs.getString("theme_mode", "SYSTEM") ?: "SYSTEM")
     val themeMode = _themeMode.asStateFlow()
@@ -328,6 +335,20 @@ class FinanceViewModel(
         }
     }
 
+    fun saveFontSizeLevel(level: Int) {
+        if (level in 0..4) {
+            _fontSizeLevel.value = level
+            prefs.edit().putInt("font_size_level", level).apply()
+        }
+    }
+
+    fun saveFontWeight(weight: String) {
+        if (weight == "NORMAL" || weight == "BOLD") {
+            _fontWeight.value = weight
+            prefs.edit().putString("font_weight", weight).apply()
+        }
+    }
+
     // --- Customizable Notification Reminders ---
     fun toggleReminder(enabled: Boolean) {
         _reminderEnabled.value = enabled
@@ -409,6 +430,17 @@ class FinanceViewModel(
     fun deleteTransaction(transaction: Transaction) {
         viewModelScope.launch {
             repository.deleteTransaction(transaction)
+        }
+    }
+
+    fun resetMonthData(monthId: String) {
+        viewModelScope.launch {
+            repository.getTransactionsForMonth(monthId).first().forEach { transaction ->
+                repository.deleteTransaction(transaction)
+            }
+            repository.getMonthBudget(monthId)?.let { budget ->
+                repository.insertMonthBudget(budget.copy(baseIncome = 0.0))
+            }
         }
     }
 
