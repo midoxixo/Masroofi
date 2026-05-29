@@ -3519,7 +3519,7 @@ fun SettingsToolsTab(
                             .height(48.dp)
                             .testTag("btn_reset_month"),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error.copy(alpha=0.8f))
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
                         Text(
                             text = LanguageStrings.get("reset_month_data", lang),
