@@ -3589,7 +3589,7 @@ fun SettingsToolsTab(
                                         val cleanStr = newVal.filter { it.isDigit() }
                                         if (cleanStr.length <= 2) {
                                             val h = cleanStr.toIntOrNull()
-                                            if (h == null || h in 1..12) {
+                                            if (h == null || h in 0..12) {
                                                 manualHour = cleanStr
                                             }
                                         }
