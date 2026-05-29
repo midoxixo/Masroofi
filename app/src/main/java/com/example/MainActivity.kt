@@ -2963,6 +2963,64 @@ fun SettingsToolsTab(
     val categoriesList by viewModel.customCategories.collectAsStateWithLifecycle()
     var showResetMonthDialog by remember { mutableStateOf(false) }
     var showResetAllDialog by remember { mutableStateOf(false) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var updateInfoData by remember { mutableStateOf<com.example.ui.UpdateInfo?>(null) }
+    val currentAppVersionCode = 3 // matching build.gradle.kts versionCode
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+
+    if (showUpdateDialog && updateInfoData != null) {
+        val info = updateInfoData!!
+        val isAr = lang == AppLanguage.AR
+        AlertDialog(
+            onDismissRequest = { 
+                if (!info.isForceUpdate) {
+                    showUpdateDialog = false 
+                }
+            },
+            title = { Text(LanguageStrings.get("new_update_available", lang)) },
+            text = {
+                Column {
+                    Text(
+                        text = "${LanguageStrings.get("update_app_version", lang)} ${info.versionName}",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isAr) info.releaseNotesAr else info.releaseNotesEn,
+                        fontSize = 14.sp
+                    )
+                    if (info.isForceUpdate) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = LanguageStrings.get("force_update_message", lang),
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    try {
+                        uriHandler.openUri(info.downloadUrl)
+                    } catch (e: Exception) {
+                        // ignore
+                    }
+                }) { 
+                    Text(LanguageStrings.get("update_now", lang)) 
+                }
+            },
+            dismissButton = {
+                if (!info.isForceUpdate) {
+                    TextButton(onClick = { showUpdateDialog = false }) { 
+                        Text(LanguageStrings.get("update_later", lang)) 
+                    }
+                }
+            }
+        )
+    }
 
     if (showResetMonthDialog) {
         AlertDialog(
@@ -3246,10 +3304,22 @@ fun SettingsToolsTab(
                     Button(
                         onClick = {
                             isCheckingUpdate = true
-                            scope.launch {
-                                kotlinx.coroutines.delay(1500)
-                                android.widget.Toast.makeText(context, LanguageStrings.get("app_up_to_date", lang), android.widget.Toast.LENGTH_SHORT).show()
-                                isCheckingUpdate = false
+                            coroutineScope.launch {
+                                try {
+                                    val info = com.example.ui.UpdateManager.checkUpdate()
+                                    if (info != null && info.versionCode > currentAppVersionCode) {
+                                        updateInfoData = info
+                                        showUpdateDialog = true
+                                    } else {
+                                        android.widget.Toast.makeText(context, LanguageStrings.get("app_up_to_date", lang), android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                } catch (e: java.io.IOException) {
+                                    android.widget.Toast.makeText(context, LanguageStrings.get("no_internet", lang), android.widget.Toast.LENGTH_LONG).show()
+                                } catch (e: Throwable) {
+                                    android.widget.Toast.makeText(context, LanguageStrings.get("app_up_to_date", lang), android.widget.Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    isCheckingUpdate = false
+                                }
                             }
                         },
                         modifier = Modifier

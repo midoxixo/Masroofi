@@ -96,7 +96,12 @@ object LanguageStrings {
         "font_size" to "حجم الخط",
         "font_weight" to "سماكة الخط",
         "bold" to "عريض",
-        "normal" to "عادي"
+        "normal" to "عادي",
+        "new_update_available" to "يوجد تحديث جديد متاح!",
+        "update_now" to "تحديث الآن",
+        "update_later" to "لاحقاً",
+        "no_internet" to "لا يوجد اتصال بالإنترنت.",
+        "force_update_message" to "يجب تحديث التطبيق إلى أحدث إصدار للمتابعة."
     )
 
     private val enMap = mapOf(
@@ -192,7 +197,12 @@ object LanguageStrings {
         "font_size" to "Font Size",
         "font_weight" to "Font Weight",
         "bold" to "Bold",
-        "normal" to "Normal"
+        "normal" to "Normal",
+        "new_update_available" to "New Update Available!",
+        "update_now" to "Update Now",
+        "update_later" to "Later",
+        "no_internet" to "No internet connection.",
+        "force_update_message" to "You must update the app to the latest version to continue."
     )
 
     fun get(key: String, lang: AppLanguage): String {
