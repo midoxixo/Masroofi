@@ -2972,6 +2972,8 @@ fun SettingsToolsTab(
     var showResetAllDialog by remember { mutableStateOf(false) }
     var showUpdateDialog by remember { mutableStateOf(false) }
     var updateInfoData by remember { mutableStateOf<com.example.ui.UpdateInfo?>(null) }
+    var downloadProgress by remember { mutableStateOf<Float?>(null) }
+    var downloadError by remember { mutableStateOf<String?>(null) }
     val currentAppVersionCode = BuildConfig.VERSION_CODE
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
 
@@ -2980,8 +2982,10 @@ fun SettingsToolsTab(
         val isAr = lang == AppLanguage.AR
         AlertDialog(
             onDismissRequest = { 
-                if (!info.isForceUpdate) {
+                if (!info.isForceUpdate && downloadProgress == null) {
                     showUpdateDialog = false 
+                    downloadProgress = null
+                    downloadError = null
                 }
             },
             title = { Text(LanguageStrings.get("new_update_available", lang)) },
@@ -3006,30 +3010,107 @@ fun SettingsToolsTab(
                             fontSize = 14.sp
                         )
                     }
+
+                    if (downloadProgress != null) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        val progressVal = downloadProgress!!
+                        if (progressVal < 1f) {
+                            LinearProgressIndicator(
+                                progress = progressVal,
+                                modifier = Modifier.fillMaxWidth().height(8.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = if (isAr) "جاري تنزيل التحديث: ${(progressVal * 100).toInt()}%" else "Downloading update: ${(progressVal * 100).toInt()}%",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = if (isAr) "جاري فتح حزمة التثبيت..." else "Opening installer package...",
+                                fontSize = 12.sp,
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    if (downloadError != null) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = if (isAr) "فشل التنزيل التلقائي. يمكنك التنزيل عبر المتصفح." else "Automatic download failed. You can download via browser.",
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = downloadError!!,
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                            fontSize = 11.sp
+                        )
+                    }
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    try {
-                        uriHandler.openUri(info.downloadUrl)
-                        if (!info.isForceUpdate) {
-                            showUpdateDialog = false
+                if (downloadProgress == null) {
+                    Button(onClick = {
+                        downloadError = null
+                        coroutineScope.launch {
+                            downloadProgress = 0f
+                            com.example.ui.UpdateManager.downloadAndInstallApk(
+                                context = context,
+                                downloadUrl = info.downloadUrl,
+                                onProgress = { progress ->
+                                    downloadProgress = progress
+                                },
+                                onSuccess = {
+                                    downloadProgress = 1.0f
+                                },
+                                onError = { error ->
+                                    downloadProgress = null
+                                    downloadError = error.localizedMessage ?: error.toString()
+                                }
+                            )
                         }
-                    } catch (e: Exception) {
-                        try {
-                            android.widget.Toast.makeText(context, if (lang == AppLanguage.AR) "تعذر فتح المتصفح للتنزيل" else "Could not open browser to download", android.widget.Toast.LENGTH_SHORT).show()
-                        } catch (e2: Exception) {
-                            // ignore
-                        }
+                    }) {
+                        Text(if (isAr) "تحديث تلقائي" else "Auto Update") 
                     }
-                }) {
-                    Text(LanguageStrings.get("update_now", lang)) 
                 }
             },
             dismissButton = {
-                if (!info.isForceUpdate) {
-                    TextButton(onClick = { showUpdateDialog = false }) { 
-                        Text(LanguageStrings.get("update_later", lang)) 
+                Row {
+                    if (downloadProgress == null) {
+                        TextButton(onClick = {
+                            try {
+                                uriHandler.openUri(info.downloadUrl)
+                                if (!info.isForceUpdate) {
+                                    showUpdateDialog = false
+                                }
+                            } catch (e: Exception) {
+                                android.widget.Toast.makeText(context, if (isAr) "تعذر فتح المتصفح للتنزيل" else "Could not open browser to download", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
+                            Text(if (isAr) "تنزيل يدوي" else "Manual Download")
+                        }
+                    }
+                    if (!info.isForceUpdate && downloadProgress == null) {
+                        TextButton(onClick = { 
+                            showUpdateDialog = false 
+                            downloadProgress = null
+                            downloadError = null
+                        }) { 
+                            Text(LanguageStrings.get("update_later", lang)) 
+                        }
                     }
                 }
             }
