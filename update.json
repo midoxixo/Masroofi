@@ -1,8 +1,0 @@
-{
-  "versionCode": 5,
-  "versionName": "1.5",
-  "isForceUpdate": false,
-  "releaseNotesEn": "Added new manual time config and bug fixes.",
-  "releaseNotesAr": "تمت إضافة ميزات جديدة وإصلاح الأخطاء.\n- إضافة تحديد وضبط وقت التنبيه يدوياً\n- تم تحسين مُدقق التحديثات التلقائي",
-  "downloadUrl": "https://github.com/midoxixo/Masroofi/releases/latest/download/app-release.apk"
-}

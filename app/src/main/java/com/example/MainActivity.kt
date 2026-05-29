@@ -147,14 +147,15 @@ fun MainAppScreen(viewModel: FinanceViewModel) {
                         allMonths = allMonths,
                         userName = userName,
                         userEmail = userEmail,
-                        onMonthSelected = { viewModel.selectMonth(it) },
-                        onLanguageToggle = { viewModel.toggleLanguage() },
-                        onStartNewMonth = { showNewMonthDialog = true },
-                        onSettingsClick = { selectedTab = 4 }
+                        onMonthSelected = { viewModel.selectMonth(it); viewModel.triggerVibration() },
+                        onLanguageToggle = { viewModel.toggleLanguage(); viewModel.triggerVibration() },
+                        onStartNewMonth = { showNewMonthDialog = true; viewModel.triggerVibration() },
+                        onSettingsClick = { selectedTab = 4; viewModel.triggerVibration() }
                     )
                 },
                 bottomBar = {
                     MainBottomNavigationBar(
+                        viewModel = viewModel,
                         lang = lang,
                         selectedTab = selectedTab,
                         onTabSelected = { selectedTab = it }
@@ -491,6 +492,7 @@ fun MonthSelectorDropdown(
 // ==========================================
 @Composable
 fun MainBottomNavigationBar(
+    viewModel: FinanceViewModel,
     lang: AppLanguage,
     selectedTab: Int,
     onTabSelected: (Int) -> Unit
@@ -502,7 +504,7 @@ fun MainBottomNavigationBar(
     ) {
         NavigationBarItem(
             selected = selectedTab == 0,
-            onClick = { onTabSelected(0) },
+            onClick = { viewModel.triggerVibration(); onTabSelected(0) },
             label = { Text(LanguageStrings.get("tab_dashboard", lang), fontSize = 11.sp) },
             icon = {
                 Icon(
@@ -519,7 +521,7 @@ fun MainBottomNavigationBar(
         )
         NavigationBarItem(
             selected = selectedTab == 1,
-            onClick = { onTabSelected(1) },
+            onClick = { viewModel.triggerVibration(); onTabSelected(1) },
             label = { Text(LanguageStrings.get("tab_compare", lang), fontSize = 11.sp) },
             icon = {
                 Icon(
@@ -536,7 +538,7 @@ fun MainBottomNavigationBar(
         )
         NavigationBarItem(
             selected = selectedTab == 2,
-            onClick = { onTabSelected(2) },
+            onClick = { viewModel.triggerVibration(); onTabSelected(2) },
             label = { Text(LanguageStrings.get("tab_filter", lang), fontSize = 11.sp) },
             icon = {
                 Icon(
@@ -553,7 +555,7 @@ fun MainBottomNavigationBar(
         )
         NavigationBarItem(
             selected = selectedTab == 3,
-            onClick = { onTabSelected(3) },
+            onClick = { viewModel.triggerVibration(); onTabSelected(3) },
             label = { Text(LanguageStrings.get("tab_loans", lang), fontSize = 11.sp) },
             icon = {
                 Icon(
@@ -2960,6 +2962,8 @@ fun SettingsToolsTab(
 
     val fontSizeLevel by viewModel.fontSizeLevel.collectAsStateWithLifecycle()
     val fontWeight by viewModel.fontWeight.collectAsStateWithLifecycle()
+    val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+    val vibrationLevel by viewModel.vibrationLevel.collectAsStateWithLifecycle()
 
     val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
     val chatLoading by viewModel.isChatLoading.collectAsStateWithLifecycle()
@@ -3196,7 +3200,7 @@ fun SettingsToolsTab(
                                     .size(40.dp)
                                     .clip(CircleShape)
                                     .background(if (fontSizeLevel == level) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
-                                    .clickable { viewModel.saveFontSizeLevel(level) },
+                                    .clickable { viewModel.saveFontSizeLevel(level); viewModel.triggerVibration() },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -3230,7 +3234,7 @@ fun SettingsToolsTab(
                         )
                         Switch(
                             checked = fontWeight == "BOLD",
-                            onCheckedChange = { viewModel.saveFontWeight(if (it) "BOLD" else "NORMAL") }
+                            onCheckedChange = { viewModel.saveFontWeight(if (it) "BOLD" else "NORMAL"); viewModel.triggerVibration() }
                         )
                         Text(
                             text = LanguageStrings.get("bold", lang),
@@ -3242,7 +3246,77 @@ fun SettingsToolsTab(
             }
         }
 
-        // --- 1. LANGUAGE & 10 BEAUTIFUL THEMES SELECTOR ---
+        // --- VIBRATION SETTINGS SECTION ---
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = if (isAr) "📳 إعدادات الاهتزاز (Haptics)" else "📳 Vibration Settings",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (isAr) "تفعيل اهتزاز اللمس" else "Enable Touch Vibration",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Switch(
+                            checked = vibrationEnabled,
+                            onCheckedChange = { viewModel.setVibrationEnabled(it) }
+                        )
+                    }
+
+                    if (vibrationEnabled) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Divider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f))
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = if (isAr) "مستوى اهتزاز اللمس (1 إلى 6)" else "Vibration Level (1 to 6)",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            (1..6).forEach { level ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(if (vibrationLevel == level) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
+                                        .clickable { viewModel.setVibrationLevel(level) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = level.toString(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (vibrationLevel == level) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 1. LANGUAGE & 12 BEAUTIFUL THEMES SELECTOR ---
         item {
             Card(
                 shape = RoundedCornerShape(16.dp),
@@ -3313,6 +3387,7 @@ fun SettingsToolsTab(
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
+                            viewModel.triggerVibration()
                             isCheckingUpdate = true
                             coroutineScope.launch {
                                 try {
@@ -3424,7 +3499,7 @@ fun SettingsToolsTab(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(if (!isCurrentlyDark) MaterialTheme.colorScheme.primary else Color.Transparent)
-                                        .clickable { viewModel.saveThemeMode("LIGHT") }
+                                        .clickable { viewModel.saveThemeMode("LIGHT"); viewModel.triggerVibration() }
                                         .padding(horizontal = 20.dp, vertical = 10.dp)
                                         .testTag("settings_theme_light_toggle"),
                                     contentAlignment = Alignment.Center
@@ -3440,7 +3515,7 @@ fun SettingsToolsTab(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(if (isCurrentlyDark) MaterialTheme.colorScheme.primary else Color.Transparent)
-                                        .clickable { viewModel.saveThemeMode("DARK") }
+                                        .clickable { viewModel.saveThemeMode("DARK"); viewModel.triggerVibration() }
                                         .padding(horizontal = 20.dp, vertical = 10.dp)
                                         .testTag("settings_theme_dark_toggle"),
                                     contentAlignment = Alignment.Center
@@ -3456,13 +3531,13 @@ fun SettingsToolsTab(
 
                     Spacer(modifier = Modifier.height(14.dp))
                     Text(
-                        text = if (isAr) "اختر من بين 10 سمات وألوان مذهلة:" else "Choose from 10 stunning themes:",
+                        text = if (isAr) "اختر من بين 12 سمة وألوان مذهلة:" else "Choose from 12 stunning themes:",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 10 Color Theme clickers horizontally scrolling
+                    // 12 Color Theme clickers horizontally scrolling
                     val themeNames = listOf(
                         if (isAr) "البنفسجي" else "Purple",
                         if (isAr) "الزمردي" else "Emerald",
@@ -3473,7 +3548,9 @@ fun SettingsToolsTab(
                         if (isAr) "السايبر" else "CyberNeon",
                         if (isAr) "الزيتوني" else "Forest Sage",
                         if (isAr) "الياقوتي" else "Ruby",
-                        if (isAr) "اللافندر" else "Lavender"
+                        if (isAr) "اللافندر" else "Lavender",
+                        if (isAr) "حلم التركواز" else "Turquoise Dream",
+                        if (isAr) "نار الغابة" else "Forest Fire"
                     )
 
                     val themeColors = listOf(
@@ -3486,7 +3563,9 @@ fun SettingsToolsTab(
                         Color(0xFF06B6D4), // Cyber
                         Color(0xFF4F5E43), // Sage
                         Color(0xFFDC2626), // Ruby
-                        Color(0xFF7C3AED)  // Lavender
+                        Color(0xFF7C3AED), // Lavender
+                        Color(0xFF14B8A6), // Turquoise Dream
+                        Color(0xFF166534)  // Forest Fire
                     )
 
                     Row(
@@ -3500,7 +3579,7 @@ fun SettingsToolsTab(
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
-                                    .clickable { viewModel.saveThemeIndex(index) }
+                                    .clickable { viewModel.saveThemeIndex(index); viewModel.triggerVibration() }
                                     .padding(4.dp)
                             ) {
                                 Box(

@@ -98,6 +98,46 @@ class FinanceViewModel(
     // Active selected month for the dashboard
     val activeMonthId = MutableStateFlow("2026-05")
 
+    // --- Vibration settings ---
+    private val _vibrationEnabled = MutableStateFlow(prefs.getBoolean("vibration_enabled", false))
+    val vibrationEnabled = _vibrationEnabled.asStateFlow()
+
+    private val _vibrationLevel = MutableStateFlow(prefs.getInt("vibration_level", 3))
+    val vibrationLevel = _vibrationLevel.asStateFlow()
+
+    fun setVibrationEnabled(enabled: Boolean) {
+        _vibrationEnabled.value = enabled
+        prefs.edit().putBoolean("vibration_enabled", enabled).apply()
+    }
+
+    fun setVibrationLevel(level: Int) {
+        _vibrationLevel.value = level
+        prefs.edit().putInt("vibration_level", level).apply()
+        // Trigger a test vibration whenever user changes it so they feel it immediately
+        triggerVibration()
+    }
+
+    fun triggerVibration() {
+        if (!_vibrationEnabled.value) return
+        try {
+            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+            if (vibrator?.hasVibrator() == true) {
+                val level = _vibrationLevel.value // 1 to 6
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    val duration = 20L + (level * 5L)
+                    val amplitude = 40 + ((level - 1) * 40) // 40 up to 240
+                    vibrator.vibrate(android.os.VibrationEffect.createOneShot(duration, if (amplitude > 255) 255 else amplitude))
+                } else {
+                    val duration = 15L + (level * 10L)
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(duration)
+                }
+            }
+        } catch (e: Exception) {
+           // ignore
+        }
+    }
+
     // Retrieve all recorded monthly budgets
     val allMonthBudgets: StateFlow<List<MonthBudget>> = repository.allMonthBudgets
         .stateIn(

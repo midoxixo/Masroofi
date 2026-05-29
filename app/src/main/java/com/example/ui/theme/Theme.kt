@@ -256,13 +256,61 @@ private val DarkThemeLavender = darkColorScheme(
     onSurface = Color(0xFFEDE9FE)
 )
 
+// Theme 10: Turquoise Dream
+private val LightThemeTurquoiseDream = lightColorScheme(
+    primary = Color(0xFF14B8A6), // Turquoise
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFCCFBF1),
+    onPrimaryContainer = Color(0xFF042F2E),
+    secondary = Color(0xFFC084FC), // Light Purple
+    background = Color(0xFFF5F6F8),
+    surface = Color(0xFFF5F6F8),
+    onBackground = Color(0xFF040B0A),
+    onSurface = Color(0xFF0A1F1D)
+)
+private val DarkThemeTurquoiseDream = darkColorScheme(
+    primary = Color(0xFF5EEAD4),
+    onPrimary = Color(0xFF042F2E),
+    primaryContainer = Color(0xFF0F766E),
+    onPrimaryContainer = Color(0xFFCCFBF1),
+    secondary = Color(0xFFD8B4E2),
+    background = Color(0xFF020908),
+    surface = Color(0xFF061A18),
+    onBackground = Color(0xFFF0FAF9),
+    onSurface = Color(0xFFCCFBF1)
+)
+
+// Theme 11: Forest Fire
+private val LightThemeForestFire = lightColorScheme(
+    primary = Color(0xFF166534), // Dark Green
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFBBF7D0),
+    onPrimaryContainer = Color(0xFF14532D),
+    secondary = Color(0xFFEF4444), // Red
+    background = Color(0xFFF5F6F8),
+    surface = Color(0xFFF5F6F8),
+    onBackground = Color(0xFF030D07),
+    onSurface = Color(0xFF082212)
+)
+private val DarkThemeForestFire = darkColorScheme(
+    primary = Color(0xFF22C55E),
+    onPrimary = Color(0xFF14532D),
+    primaryContainer = Color(0xFF166534),
+    onPrimaryContainer = Color(0xFFBBF7D0),
+    secondary = Color(0xFFF87171),
+    background = Color(0xFF010603),
+    surface = Color(0xFF06180D),
+    onBackground = Color(0xFFECFDF3),
+    onSurface = Color(0xFFBBF7D0)
+)
+
 @Composable
 fun MyApplicationTheme(
     themeIndex: Int = 0,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    // Select the correct light & dark scheme based on 10 themes
+    // Select the correct light & dark scheme based on 12 themes
     val colorScheme = when (themeIndex) {
         0 -> if (darkTheme) DarkThemePurple else LightThemePurple
         1 -> if (darkTheme) DarkThemeEmerald else LightThemeEmerald
@@ -274,6 +322,8 @@ fun MyApplicationTheme(
         7 -> if (darkTheme) DarkThemeSage else LightThemeSage
         8 -> if (darkTheme) DarkThemeRuby else LightThemeRuby
         9 -> if (darkTheme) DarkThemeLavender else LightThemeLavender
+        10 -> if (darkTheme) DarkThemeTurquoiseDream else LightThemeTurquoiseDream
+        11 -> if (darkTheme) DarkThemeForestFire else LightThemeForestFire
         else -> if (darkTheme) DarkThemePurple else LightThemePurple
     }
 
