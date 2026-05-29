@@ -3570,91 +3570,132 @@ fun SettingsToolsTab(
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             // Hour input
-                            OutlinedTextField(
-                                value = manualHour,
-                                onValueChange = { newVal ->
-                                    val cleanStr = newVal.filter { it.isDigit() }
-                                    if (cleanStr.length <= 2) {
-                                        val h = cleanStr.toIntOrNull()
-                                        if (h == null || h in 1..12) {
-                                            manualHour = cleanStr
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.foundation.text.BasicTextField(
+                                    value = manualHour,
+                                    onValueChange = { newVal ->
+                                        val cleanStr = newVal.filter { it.isDigit() }
+                                        if (cleanStr.length <= 2) {
+                                            val h = cleanStr.toIntOrNull()
+                                            if (h == null || h in 1..12) {
+                                                manualHour = cleanStr
+                                            }
                                         }
+                                    },
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    textStyle = androidx.compose.ui.text.TextStyle(
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    ),
+                                    modifier = Modifier.fillMaxWidth().testTag("reminder_manual_hour"),
+                                    decorationBox = { innerTextField ->
+                                        if (manualHour.isEmpty()) {
+                                            Text(if (isAr) "س" else "H", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                                        }
+                                        innerTextField()
                                     }
-                                },
-                                label = { Text(if (isAr) "ساعة" else "Hr", fontSize = 10.sp, maxLines = 1) },
-                                placeholder = { Text("12", fontSize = 10.sp) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.weight(1f).testTag("reminder_manual_hour"),
-                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp)
-                            )
+                                )
+                            }
 
                             Text(":", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
 
                             // Minute input
-                            OutlinedTextField(
-                                value = manualMinute,
-                                onValueChange = { newVal ->
-                                    val cleanStr = newVal.filter { it.isDigit() }
-                                    if (cleanStr.length <= 2) {
-                                        val m = cleanStr.toIntOrNull()
-                                        if (m == null || m in 0..59) {
-                                            manualMinute = cleanStr
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.foundation.text.BasicTextField(
+                                    value = manualMinute,
+                                    onValueChange = { newVal ->
+                                        val cleanStr = newVal.filter { it.isDigit() }
+                                        if (cleanStr.length <= 2) {
+                                            val m = cleanStr.toIntOrNull()
+                                            if (m == null || m in 0..59) {
+                                                manualMinute = cleanStr
+                                            }
                                         }
+                                    },
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    textStyle = androidx.compose.ui.text.TextStyle(
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    ),
+                                    modifier = Modifier.fillMaxWidth().testTag("reminder_manual_minute"),
+                                    decorationBox = { innerTextField ->
+                                        if (manualMinute.isEmpty()) {
+                                            Text(if (isAr) "د" else "M", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                                        }
+                                        innerTextField()
                                     }
-                                },
-                                label = { Text(if (isAr) "دقيقة" else "Min", fontSize = 10.sp, maxLines = 1) },
-                                placeholder = { Text("00", fontSize = 10.sp) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.weight(1f).testTag("reminder_manual_minute"),
-                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp)
-                            )
+                                )
+                            }
 
                             // Segmented layout for AM/PM
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
                                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                modifier = Modifier.height(52.dp)
+                                modifier = Modifier.height(48.dp).weight(1.3f)
                             ) {
                                 Row(
                                     modifier = Modifier.padding(2.dp),
+                                    horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Box(
                                         modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight()
                                             .clip(RoundedCornerShape(6.dp))
                                             .background(if (manualAmPm == "AM") MaterialTheme.colorScheme.primary else Color.Transparent)
                                             .clickable { manualAmPm = "AM" }
-                                            .padding(horizontal = 6.dp, vertical = 6.dp)
-                                            .testTag("reminder_manual_am")
+                                            .testTag("reminder_manual_am"),
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = if (isAr) "ص" else "AM",
                                             color = if (manualAmPm == "AM") Color.White else MaterialTheme.colorScheme.onSurface,
-                                            fontSize = 10.sp,
+                                            fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(2.dp))
                                     Box(
                                         modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight()
                                             .clip(RoundedCornerShape(6.dp))
                                             .background(if (manualAmPm == "PM") MaterialTheme.colorScheme.primary else Color.Transparent)
                                             .clickable { manualAmPm = "PM" }
-                                            .padding(horizontal = 6.dp, vertical = 6.dp)
-                                            .testTag("reminder_manual_pm")
+                                            .testTag("reminder_manual_pm"),
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = if (isAr) "م" else "PM",
                                             color = if (manualAmPm == "PM") Color.White else MaterialTheme.colorScheme.onSurface,
-                                            fontSize = 10.sp,
+                                            fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
@@ -3669,16 +3710,16 @@ fun SettingsToolsTab(
                                     if (h != null && m != null && h in 1..12 && m in 0..59) {
                                         val formattedToSave = String.format(Locale.US, "%02d:%02d %s", h, m, manualAmPm)
                                         viewModel.saveReminderTime(formattedToSave)
-                                        Toast.makeText(context, if (isAr) "تم حفظ توقيت المنبه بنجاح! ⏱️" else "Reminder time saved successfully! ⏱️", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, if (isAr) "تم الحفظ! ⏱️" else "Saved! ⏱️", Toast.LENGTH_SHORT).show()
                                     } else {
-                                        Toast.makeText(context, if (isAr) "يرجى إدخال وقت صحيح" else "Please enter a valid time", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, if (isAr) "وقت غير صحيح" else "Invalid time", Toast.LENGTH_SHORT).show()
                                     }
                                 },
                                 shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.height(52.dp).weight(1.5f).testTag("reminder_manual_save_button"),
+                                modifier = Modifier.height(48.dp).weight(1.3f).testTag("reminder_manual_save_button"),
                                 contentPadding = PaddingValues(horizontal = 2.dp)
                             ) {
-                                Text(if (isAr) "حفظ" else "Set", fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                                Text(if (isAr) "حفظ" else "Save", fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                             }
                         }
                     }
