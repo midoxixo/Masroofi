@@ -2968,7 +2968,7 @@ fun SettingsToolsTab(
     var showResetAllDialog by remember { mutableStateOf(false) }
     var showUpdateDialog by remember { mutableStateOf(false) }
     var updateInfoData by remember { mutableStateOf<com.example.ui.UpdateInfo?>(null) }
-    val currentAppVersionCode = 3 // matching build.gradle.kts versionCode
+    val currentAppVersionCode = BuildConfig.VERSION_CODE
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
 
     if (showUpdateDialog && updateInfoData != null) {
@@ -3007,30 +3007,18 @@ fun SettingsToolsTab(
             confirmButton = {
                 Button(onClick = {
                     try {
-                        if (info.downloadUrl.endsWith(".apk", ignoreCase = true) || info.downloadUrl.contains("github.com", ignoreCase = true)) {
-                            // Automatically download via DownloadManager
-                            val request = android.app.DownloadManager.Request(android.net.Uri.parse(info.downloadUrl))
-                            request.setTitle(LanguageStrings.get("update_app_version", lang) + " " + info.versionName)
-                            request.setDescription(if (lang == AppLanguage.AR) "جاري تنزيل التحديث..." else "Downloading update...")
-                            request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                            request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, "masroofi_update_${info.versionName}.apk")
-                            val downloadManager = context.getSystemService(android.content.Context.DOWNLOAD_SERVICE) as android.app.DownloadManager
-                            downloadManager.enqueue(request)
-                            android.widget.Toast.makeText(context, if (lang == AppLanguage.AR) "بدأ التنزيل..." else "Download started...", android.widget.Toast.LENGTH_SHORT).show()
-                        } else {
-                            uriHandler.openUri(info.downloadUrl)
-                        }
+                        uriHandler.openUri(info.downloadUrl)
                         if (!info.isForceUpdate) {
                             showUpdateDialog = false
                         }
                     } catch (e: Exception) {
                         try {
-                            uriHandler.openUri(info.downloadUrl)
+                            android.widget.Toast.makeText(context, if (lang == AppLanguage.AR) "تعذر فتح المتصفح للتنزيل" else "Could not open browser to download", android.widget.Toast.LENGTH_SHORT).show()
                         } catch (e2: Exception) {
                             // ignore
                         }
                     }
-                }) { 
+                }) {
                     Text(LanguageStrings.get("update_now", lang)) 
                 }
             },

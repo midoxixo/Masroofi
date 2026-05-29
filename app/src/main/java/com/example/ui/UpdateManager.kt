@@ -19,7 +19,7 @@ object UpdateManager {
 
     // TODO: Replace this URL with the actual raw JSON URL where you host your update.json
     // Example: "https://raw.githubusercontent.com/username/repo/main/update.json"
-    private const val UPDATE_JSON_URL = "https://gist.githubusercontent.com/dummy/update.json"
+    private const val UPDATE_JSON_URL = "https://raw.githubusercontent.com/midoxixo/Masroofi/main/update.json"
     private val client = OkHttpClient()
 
     /**
@@ -36,15 +36,13 @@ object UpdateManager {
                         val responseBody = response.body?.string()
                         return@withContext parseJson(responseBody)
                     } else {
-                        // Return mock info for demonstration if the dummy URL is 404
-                        return@withContext getMockUpdateInfo()
+                        // Return null if there's no update file on GitHub
+                        return@withContext null
                     }
                 } catch (e: java.io.IOException) {
-                    // No internet or timeout
                     throw e
                 }
             } catch (e: Exception) {
-                // Throw to let the UI know we couldn't connect
                 throw e
             }
         }
@@ -55,27 +53,15 @@ object UpdateManager {
         return try {
             val json = JSONObject(body)
             UpdateInfo(
-                versionCode = json.optInt("versionCode", 4), // Fallback to 4 for testing
-                versionName = json.optString("versionName", "1.3"),
+                versionCode = json.getInt("versionCode"),
+                versionName = json.getString("versionName"),
                 isForceUpdate = json.optBoolean("isForceUpdate", false),
                 releaseNotesEn = json.optString("releaseNotesEn", "Added new features and bug fixes."),
                 releaseNotesAr = json.optString("releaseNotesAr", "تم إضافة ميزات جديدة وإصلاح بعض الأخطاء."),
-                downloadUrl = json.optString("downloadUrl", "https://github.com/USERNAME/REPO/releases/download/v1.3/app-release.apk")
+                downloadUrl = json.getString("downloadUrl")
             )
         } catch (e: Exception) {
             null
         }
-    }
-
-    // A mock method to supply update info for testing since we don't have a real update.json
-    fun getMockUpdateInfo(): UpdateInfo {
-        return UpdateInfo(
-            versionCode = 4,
-            versionName = "1.3",
-            isForceUpdate = false,
-            releaseNotesEn = "Added new features and bug fixes.\n- Performance improvements\n- UI enhancements",
-            releaseNotesAr = "تمت إضافة ميزات جديدة وإصلاح الأخطاء.\n- تحسينات الأداء\n- تحديثات الواجهة",
-            downloadUrl = "https://github.com/USERNAME/REPO/releases/download/v1.3/app-release.apk"
-        )
     }
 }
