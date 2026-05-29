@@ -60,7 +60,7 @@ object UpdateManager {
                 isForceUpdate = json.optBoolean("isForceUpdate", false),
                 releaseNotesEn = json.optString("releaseNotesEn", "Added new features and bug fixes."),
                 releaseNotesAr = json.optString("releaseNotesAr", "تم إضافة ميزات جديدة وإصلاح بعض الأخطاء."),
-                downloadUrl = json.optString("downloadUrl", "https://play.google.com/store/apps/details?id=com.aistudio.masroofy.zkwldn")
+                downloadUrl = json.optString("downloadUrl", "https://github.com/USERNAME/REPO/releases/latest")
             )
         } catch (e: Exception) {
             null
@@ -75,7 +75,7 @@ object UpdateManager {
             isForceUpdate = false,
             releaseNotesEn = "Added new features and bug fixes.\n- Performance improvements\n- UI enhancements",
             releaseNotesAr = "تمت إضافة ميزات جديدة وإصلاح الأخطاء.\n- تحسينات الأداء\n- تحديثات الواجهة",
-            downloadUrl = "https://play.google.com/store/apps/details?id=com.aistudio.masroofy.zkwldn"
+            downloadUrl = "https://github.com/USERNAME/REPO/releases/latest"
         )
     }
 }
