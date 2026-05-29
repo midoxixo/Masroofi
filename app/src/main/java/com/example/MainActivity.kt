@@ -68,6 +68,17 @@ import java.util.*
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Prevent multiple instances of the app (cloning issue) when launched from the package installer
+        if (!isTaskRoot) {
+            val intent = intent
+            val intentAction = intent.action
+            if (intent.hasCategory(android.content.Intent.CATEGORY_LAUNCHER) && intentAction != null && intentAction == android.content.Intent.ACTION_MAIN) {
+                finish()
+                return
+            }
+        }
+
         enableEdgeToEdge()
 
         // Setup Repository & ViewModel
@@ -1114,51 +1125,6 @@ fun DashboardTab(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Outlined add expense action
-                OutlinedButton(
-                    onClick = onAddExpenseClick,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp)
-                        .testTag("btn_add_expense"),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFFEE2E2)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "−",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFFB91C1C)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = LanguageStrings.get("add_expense", lang),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
                 // Outlined add income action
                 OutlinedButton(
                     onClick = onAddIncomeClick,
@@ -1195,6 +1161,51 @@ fun DashboardTab(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = LanguageStrings.get("add_extra_income", lang),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                // Outlined add expense action
+                OutlinedButton(
+                    onClick = onAddExpenseClick,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                        .testTag("btn_add_expense"),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFFEE2E2)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "−",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color(0xFFB91C1C)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = LanguageStrings.get("add_expense", lang),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -2565,25 +2576,45 @@ fun SimpleDatePickerSelectDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(140.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val daysList = remember { (1..31).map { it.toString() } }
+                    val monthsList = remember { (1..12).map { it.toString() } }
+                    val currentYear = currentCalendar.get(Calendar.YEAR)
+                    val yearsList = remember { (2000..(currentYear + 15)).map { it.toString() } }
+                    
                     // Day Selector Spinner column
                     Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = if (lang == AppLanguage.AR) "اليوم" else "Day", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                        NumberStepper(value = selectedDay, min = 1, max = 31, onValueChange = { selectedDay = it })
+                        Spacer(modifier = Modifier.height(8.dp))
+                        com.example.ui.WheelPicker(
+                            items = daysList,
+                            selectedIndex = daysList.indexOf(selectedDay.toString()).coerceAtLeast(0),
+                            onIndexSelected = { selectedDay = daysList[it].toInt() }
+                        )
                     }
 
                     // Month Selector Spinner column
                     Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = if (lang == AppLanguage.AR) "الشهر" else "Month", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                        NumberStepper(value = selectedMonth + 1, min = 1, max = 12, onValueChange = { selectedMonth = it - 1 })
+                        Spacer(modifier = Modifier.height(8.dp))
+                        com.example.ui.WheelPicker(
+                            items = monthsList,
+                            selectedIndex = selectedMonth,
+                            onIndexSelected = { selectedMonth = it }
+                        )
                     }
 
                     // Year Selector Spinner column
                     Column(modifier = Modifier.weight(1.2f), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = if (lang == AppLanguage.AR) "السنة" else "Year", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                        NumberStepper(value = selectedYear, min = 2020, max = 2035, onValueChange = { selectedYear = it })
+                        Spacer(modifier = Modifier.height(8.dp))
+                        com.example.ui.WheelPicker(
+                            items = yearsList,
+                            selectedIndex = yearsList.indexOf(selectedYear.toString()).coerceAtLeast(0),
+                            onIndexSelected = { selectedYear = yearsList[it].toInt() }
+                        )
                     }
                 }
 
@@ -2620,50 +2651,6 @@ fun SimpleDatePickerSelectDialog(
     }
 }
 
-@Composable
-fun NumberStepper(
-    value: Int,
-    min: Int,
-    max: Int,
-    onValueChange: (Int) -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)),
-        modifier = Modifier.padding(top = 4.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(6.dp)
-        ) {
-            IconButton(
-                onClick = { if (value < max) onValueChange(value + 1) },
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null, size = 18.dp)
-            }
-            Text(
-                text = value.toString(),
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-            IconButton(
-                onClick = { if (value > min) onValueChange(value - 1) },
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(imageVector = Icons.Default.Remove, contentDescription = null, size = 18.dp)
-            }
-        }
-    }
-}
-
-@Composable
-fun Icon(imageVector: ImageVector, contentDescription: String?, size: Dp) {
-    Icon(imageVector = imageVector, contentDescription = contentDescription, modifier = Modifier.size(size))
-}
-
 // ==========================================
 // MODAL DIALOG: NEW MONTH BUDGET
 // ==========================================
@@ -2673,7 +2660,9 @@ fun StartNewMonthDialog(
     onDismiss: () -> Unit,
     onConfirm: (String, Double) -> Unit
 ) {
-    var monthIdInput by remember { mutableStateOf("2026-06") }
+    val currentCalendar = Calendar.getInstance()
+    var selectedYear by remember { mutableStateOf(currentCalendar.get(Calendar.YEAR)) }
+    var selectedMonth by remember { mutableStateOf(currentCalendar.get(Calendar.MONTH) + 1) } 
     var baseIncomeInput by remember { mutableStateOf("4500") }
     var validationError by remember { mutableStateOf<String?>(null) }
 
@@ -2699,18 +2688,36 @@ fun StartNewMonthDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Month ID Format (YYYY-MM)
-                OutlinedTextField(
-                    value = monthIdInput,
-                    onValueChange = { monthIdInput = it },
-                    label = { Text(LanguageStrings.get("month_format_tip", lang)) },
-                    singleLine = true,
-                    placeholder = { Text("YYYY-MM") },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("month_id_input")
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val monthsList = remember { (1..12).map { String.format(Locale.US, "%02d", it) } }
+                    val currentYearVal = currentCalendar.get(Calendar.YEAR)
+                    val yearsList = remember { (2000..(currentYearVal + 15)).map { it.toString() } }
+                    
+                    // Month Selector Spinner column
+                    Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = if (lang == AppLanguage.AR) "الشهر" else "Month", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        com.example.ui.WheelPicker(
+                            items = monthsList,
+                            selectedIndex = selectedMonth - 1,
+                            onIndexSelected = { selectedMonth = it + 1 }
+                        )
+                    }
+
+                    // Year Selector Spinner column
+                    Column(modifier = Modifier.weight(1.2f), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = if (lang == AppLanguage.AR) "السنة" else "Year", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        com.example.ui.WheelPicker(
+                            items = yearsList,
+                            selectedIndex = yearsList.indexOf(selectedYear.toString()).coerceAtLeast(0),
+                            onIndexSelected = { selectedYear = yearsList[it].toInt() }
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -2744,13 +2751,9 @@ fun StartNewMonthDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            val cleanedMonthId = monthIdInput.trim()
-                            if (!cleanedMonthId.matches(Regex("\\d{4}-\\d{2}"))) {
-                                validationError = LanguageStrings.get("enter_month", lang)
-                                return@Button
-                            }
+                            val cleanedMonthId = String.format(Locale.US, "%04d-%02d", selectedYear, selectedMonth)
                             val amt = baseIncomeInput.toDoubleOrNull()
-                            if (amt == null || amt <= 0) {
+                            if (amt == null || amt < 0) {
                                 validationError = LanguageStrings.get("enter_amount", lang)
                                 return@Button
                             }
@@ -3004,9 +3007,28 @@ fun SettingsToolsTab(
             confirmButton = {
                 Button(onClick = {
                     try {
-                        uriHandler.openUri(info.downloadUrl)
+                        if (info.downloadUrl.endsWith(".apk", ignoreCase = true) || info.downloadUrl.contains("github.com", ignoreCase = true)) {
+                            // Automatically download via DownloadManager
+                            val request = android.app.DownloadManager.Request(android.net.Uri.parse(info.downloadUrl))
+                            request.setTitle(LanguageStrings.get("update_app_version", lang) + " " + info.versionName)
+                            request.setDescription(if (lang == AppLanguage.AR) "جاري تنزيل التحديث..." else "Downloading update...")
+                            request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                            request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, "masroofi_update_${info.versionName}.apk")
+                            val downloadManager = context.getSystemService(android.content.Context.DOWNLOAD_SERVICE) as android.app.DownloadManager
+                            downloadManager.enqueue(request)
+                            android.widget.Toast.makeText(context, if (lang == AppLanguage.AR) "بدأ التنزيل..." else "Download started...", android.widget.Toast.LENGTH_SHORT).show()
+                        } else {
+                            uriHandler.openUri(info.downloadUrl)
+                        }
+                        if (!info.isForceUpdate) {
+                            showUpdateDialog = false
+                        }
                     } catch (e: Exception) {
-                        // ignore
+                        try {
+                            uriHandler.openUri(info.downloadUrl)
+                        } catch (e2: Exception) {
+                            // ignore
+                        }
                     }
                 }) { 
                     Text(LanguageStrings.get("update_now", lang)) 
@@ -3641,155 +3663,108 @@ fun SettingsToolsTab(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().height(140.dp)
                         ) {
-                            // Hour input
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                androidx.compose.foundation.text.BasicTextField(
-                                    value = manualHour,
-                                    onValueChange = { newVal ->
-                                        val cleanStr = newVal.filter { it.isDigit() }
-                                        if (cleanStr.length <= 2) {
-                                            val h = cleanStr.toIntOrNull()
-                                            if (h == null || h in 0..12) {
-                                                manualHour = cleanStr
-                                            }
-                                        }
-                                    },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                    textStyle = androidx.compose.ui.text.TextStyle(
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                    ),
-                                    modifier = Modifier.fillMaxWidth().testTag("reminder_manual_hour"),
-                                    decorationBox = { innerTextField ->
-                                        if (manualHour.isEmpty()) {
-                                            Text(if (isAr) "س" else "H", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                                        }
-                                        innerTextField()
-                                    }
+                            val hoursList = remember { (1..12).map { String.format(Locale.US, "%02d", it) } }
+                            val minutesList = remember { (0..59).map { String.format(Locale.US, "%02d", it) } }
+
+                            // Hour input (Wheel Picker)
+                            Box(modifier = Modifier.weight(1f)) {
+                                val selectedH = manualHour.toIntOrNull() ?: 12
+                                com.example.ui.WheelPicker(
+                                    items = hoursList,
+                                    selectedIndex = hoursList.indexOf(String.format(Locale.US, "%02d", selectedH)).coerceAtLeast(0),
+                                    onIndexSelected = { manualHour = hoursList[it] }
                                 )
                             }
 
-                            Text(":", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                            Text(":", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = MaterialTheme.colorScheme.onSurface)
 
-                            // Minute input
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                androidx.compose.foundation.text.BasicTextField(
-                                    value = manualMinute,
-                                    onValueChange = { newVal ->
-                                        val cleanStr = newVal.filter { it.isDigit() }
-                                        if (cleanStr.length <= 2) {
-                                            val m = cleanStr.toIntOrNull()
-                                            if (m == null || m in 0..59) {
-                                                manualMinute = cleanStr
-                                            }
-                                        }
-                                    },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                    textStyle = androidx.compose.ui.text.TextStyle(
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                    ),
-                                    modifier = Modifier.fillMaxWidth().testTag("reminder_manual_minute"),
-                                    decorationBox = { innerTextField ->
-                                        if (manualMinute.isEmpty()) {
-                                            Text(if (isAr) "د" else "M", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                                        }
-                                        innerTextField()
-                                    }
+                            // Minute input (Wheel Picker)
+                            Box(modifier = Modifier.weight(1f)) {
+                                val selectedM = manualMinute.toIntOrNull() ?: 0
+                                com.example.ui.WheelPicker(
+                                    items = minutesList,
+                                    selectedIndex = minutesList.indexOf(String.format(Locale.US, "%02d", selectedM)).coerceAtLeast(0),
+                                    onIndexSelected = { manualMinute = minutesList[it] }
                                 )
                             }
 
-                            // Segmented layout for AM/PM
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                modifier = Modifier.height(48.dp).weight(1.3f)
+                            Column(
+                                modifier = Modifier.weight(1.3f).fillMaxHeight(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(2.dp),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
+                                // Segmented layout for AM/PM
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    modifier = Modifier.height(48.dp).fillMaxWidth()
                                 ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxHeight()
-                                            .clip(RoundedCornerShape(6.dp))
-                                            .background(if (manualAmPm == "AM") MaterialTheme.colorScheme.primary else Color.Transparent)
-                                            .clickable { manualAmPm = "AM" }
-                                            .testTag("reminder_manual_am"),
-                                        contentAlignment = Alignment.Center
+                                    Row(
+                                        modifier = Modifier.padding(2.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text(
-                                            text = if (isAr) "ص" else "AM",
-                                            color = if (manualAmPm == "AM") Color.White else MaterialTheme.colorScheme.onSurface,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(2.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxHeight()
-                                            .clip(RoundedCornerShape(6.dp))
-                                            .background(if (manualAmPm == "PM") MaterialTheme.colorScheme.primary else Color.Transparent)
-                                            .clickable { manualAmPm = "PM" }
-                                            .testTag("reminder_manual_pm"),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = if (isAr) "م" else "PM",
-                                            color = if (manualAmPm == "PM") Color.White else MaterialTheme.colorScheme.onSurface,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight()
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(if (manualAmPm == "AM") MaterialTheme.colorScheme.primary else Color.Transparent)
+                                                .clickable { manualAmPm = "AM" }
+                                                .testTag("reminder_manual_am"),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = if (isAr) "ص" else "AM",
+                                                color = if (manualAmPm == "AM") Color.White else MaterialTheme.colorScheme.onSurface,
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(2.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight()
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(if (manualAmPm == "PM") MaterialTheme.colorScheme.primary else Color.Transparent)
+                                                .clickable { manualAmPm = "PM" }
+                                                .testTag("reminder_manual_pm"),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = if (isAr) "م" else "PM",
+                                                color = if (manualAmPm == "PM") Color.White else MaterialTheme.colorScheme.onSurface,
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
                                     }
                                 }
-                            }
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
 
-                            // Save Button
-                            Button(
-                                onClick = {
-                                    val h = manualHour.toIntOrNull()
-                                    val m = manualMinute.toIntOrNull()
-                                    if (h != null && m != null && h in 1..12 && m in 0..59) {
-                                        val formattedToSave = String.format(Locale.US, "%02d:%02d %s", h, m, manualAmPm)
-                                        viewModel.saveReminderTime(formattedToSave)
-                                        Toast.makeText(context, if (isAr) "تم الحفظ! ⏱️" else "Saved! ⏱️", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        Toast.makeText(context, if (isAr) "وقت غير صحيح" else "Invalid time", Toast.LENGTH_SHORT).show()
-                                    }
-                                },
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.height(48.dp).weight(1.3f).testTag("reminder_manual_save_button"),
-                                contentPadding = PaddingValues(horizontal = 2.dp)
-                            ) {
-                                Text(if (isAr) "حفظ" else "Save", fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                                // Save Button
+                                Button(
+                                    onClick = {
+                                        val h = manualHour.toIntOrNull()
+                                        val m = manualMinute.toIntOrNull()
+                                        if (h != null && m != null && h in 1..12 && m in 0..59) {
+                                            val formattedToSave = String.format(Locale.US, "%02d:%02d %s", h, m, manualAmPm)
+                                            viewModel.saveReminderTime(formattedToSave)
+                                            Toast.makeText(context, if (isAr) "تم الحفظ! ⏱️" else "Saved! ⏱️", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(context, if (isAr) "وقت غير صحيح" else "Invalid time", Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.height(48.dp).fillMaxWidth().testTag("reminder_manual_save_button"),
+                                    contentPadding = PaddingValues(horizontal = 2.dp)
+                                ) {
+                                    Text(if (isAr) "حفظ" else "Save", fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                                }
                             }
                         }
                     }
