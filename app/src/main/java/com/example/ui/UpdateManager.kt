@@ -29,7 +29,11 @@ object UpdateManager {
     suspend fun checkUpdate(): UpdateInfo? {
         return withContext(Dispatchers.IO) {
             try {
-                val request = Request.Builder().url(UPDATE_JSON_URL).build()
+                val urlWithTimestamp = "$UPDATE_JSON_URL?t=${System.currentTimeMillis()}"
+                val request = Request.Builder()
+                    .url(urlWithTimestamp)
+                    .cacheControl(okhttp3.CacheControl.FORCE_NETWORK)
+                    .build()
                 try {
                     val response = client.newCall(request).execute()
                     if (response.isSuccessful) {
