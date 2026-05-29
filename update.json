@@ -2,6 +2,7 @@
   "versionCode": 6,
   "versionName": "1.6",
   "isForceUpdate": false,
-  "releaseNotesEn": "Added new vibration haptics settings and 2 stunning new themes (Turquoise Dream & Forest Fire).",
-  "releaseNotesAr": "تمت إضافة إعدادات اهتزاز اللمس بمستويات متعددة، مع إدراج سِمتين جديدتين (حلم التركواز ونار الغابة).",
+  "releaseNotesEn": "Added customizable haptic feedback with 5 intensity levels, and introduced two gorgeous new blended hybrid themes: Turquoise Dream and Forest Fire.",
+  "releaseNotesAr": "تمت إضافة اهتزاز اللمس التفاعلي (Haptics) مع 5 مستويات لتعديل القوة والحساسية، وإضافة ميزتين لسمات الألوان المختلطة والجديدة كلياً: حلم التركواز ونار الغابة.",
+  "downloadUrl": "https://github.com/midoxixo/Masroofi/releases/latest"
 }

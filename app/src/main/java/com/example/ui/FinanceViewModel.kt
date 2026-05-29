@@ -102,7 +102,7 @@ class FinanceViewModel(
     private val _vibrationEnabled = MutableStateFlow(prefs.getBoolean("vibration_enabled", false))
     val vibrationEnabled = _vibrationEnabled.asStateFlow()
 
-    private val _vibrationLevel = MutableStateFlow(prefs.getInt("vibration_level", 3))
+    private val _vibrationLevel = MutableStateFlow(prefs.getInt("vibration_level", 3).coerceIn(1, 5))
     val vibrationLevel = _vibrationLevel.asStateFlow()
 
     fun setVibrationEnabled(enabled: Boolean) {
@@ -111,8 +111,9 @@ class FinanceViewModel(
     }
 
     fun setVibrationLevel(level: Int) {
-        _vibrationLevel.value = level
-        prefs.edit().putInt("vibration_level", level).apply()
+        val coercedLevel = level.coerceIn(1, 5)
+        _vibrationLevel.value = coercedLevel
+        prefs.edit().putInt("vibration_level", coercedLevel).apply()
         // Trigger a test vibration whenever user changes it so they feel it immediately
         triggerVibration()
     }
@@ -122,13 +123,13 @@ class FinanceViewModel(
         try {
             val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
             if (vibrator?.hasVibrator() == true) {
-                val level = _vibrationLevel.value // 1 to 6
+                val level = _vibrationLevel.value.coerceIn(1, 5) // 1 to 5
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    val duration = 20L + (level * 5L)
-                    val amplitude = 40 + ((level - 1) * 40) // 40 up to 240
+                    val duration = 20L + (level * 6L)
+                    val amplitude = 50 + ((level - 1) * 50) // 50 up to 250
                     vibrator.vibrate(android.os.VibrationEffect.createOneShot(duration, if (amplitude > 255) 255 else amplitude))
                 } else {
-                    val duration = 15L + (level * 10L)
+                    val duration = 15L + (level * 12L)
                     @Suppress("DEPRECATION")
                     vibrator.vibrate(duration)
                 }
@@ -362,7 +363,7 @@ class FinanceViewModel(
 
     // --- Dynamic 10 Themes Selection ---
     fun saveThemeIndex(index: Int) {
-        if (index in 0..9) {
+        if (index in 0..11) {
             _selectedThemeIndex.value = index
             prefs.edit().putInt("theme_index", index).apply()
         }

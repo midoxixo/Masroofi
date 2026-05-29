@@ -3284,7 +3284,7 @@ fun SettingsToolsTab(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = if (isAr) "مستوى اهتزاز اللمس (1 إلى 6)" else "Vibration Level (1 to 6)",
+                            text = if (isAr) "مستوى اهتزاز اللمس (1 إلى 5)" else "Vibration Level (1 to 5)",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -3294,7 +3294,7 @@ fun SettingsToolsTab(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            (1..6).forEach { level ->
+                            (1..5).forEach { level ->
                                 Box(
                                     modifier = Modifier
                                         .size(40.dp)
@@ -3553,19 +3553,19 @@ fun SettingsToolsTab(
                         if (isAr) "نار الغابة" else "Forest Fire"
                     )
 
-                    val themeColors = listOf(
-                        Color(0xFF6D28D9), // Purple
-                        Color(0xFF059669), // Emerald
-                        Color(0xFFD97706), // Gold
-                        Color(0xFF0284C7), // Oceanic
-                        Color(0xFFEA580C), // Sunset
-                        Color(0xFFD01B6A), // Rose
-                        Color(0xFF06B6D4), // Cyber
-                        Color(0xFF4F5E43), // Sage
-                        Color(0xFFDC2626), // Ruby
-                        Color(0xFF7C3AED), // Lavender
-                        Color(0xFF14B8A6), // Turquoise Dream
-                        Color(0xFF166534)  // Forest Fire
+                    val themeBrushes = listOf(
+                        Brush.linearGradient(listOf(Color(0xFF6D28D9), Color(0xFF6D28D9))), // Purple
+                        Brush.linearGradient(listOf(Color(0xFF059669), Color(0xFF059669))), // Emerald
+                        Brush.linearGradient(listOf(Color(0xFFD97706), Color(0xFFD97706))), // Gold
+                        Brush.linearGradient(listOf(Color(0xFF0284C7), Color(0xFF0284C7))), // Oceanic
+                        Brush.linearGradient(listOf(Color(0xFFEA580C), Color(0xFFEA580C))), // Sunset
+                        Brush.linearGradient(listOf(Color(0xFFD01B6A), Color(0xFFD01B6A))), // Rose
+                        Brush.linearGradient(listOf(Color(0xFF06B6D4), Color(0xFF06B6D4))), // Cyber
+                        Brush.linearGradient(listOf(Color(0xFF4F5E43), Color(0xFF4F5E43))), // Sage
+                        Brush.linearGradient(listOf(Color(0xFFDC2626), Color(0xFFDC2626))), // Ruby
+                        Brush.linearGradient(listOf(Color(0xFF7C3AED), Color(0xFF7C3AED))), // Lavender
+                        Brush.linearGradient(listOf(Color(0xFF14B8A6), Color(0xFFC084FC))), // Turquoise Dream (Turquoise + Purple)
+                        Brush.linearGradient(listOf(Color(0xFF166534), Color(0xFFEF4444)))  // Forest Fire (Green + Red)
                     )
 
                     Row(
@@ -3574,7 +3574,7 @@ fun SettingsToolsTab(
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        themeColors.forEachIndexed { index, color ->
+                        themeBrushes.forEachIndexed { index, brush ->
                             val isSelected = index == currentThemeIndex
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -3585,7 +3585,7 @@ fun SettingsToolsTab(
                                 Box(
                                     modifier = Modifier
                                         .size(40.dp)
-                                        .background(color, shape = CircleShape)
+                                        .background(brush, shape = CircleShape)
                                         .padding(2.dp)
                                 ) {
                                     if (isSelected) {
